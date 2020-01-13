@@ -25,7 +25,7 @@ def add_time(bus_dict_input):
 
 
 def scp_send():
-    scp = subprocess.check_output(["scp", "-i", "keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
+    scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
     #for line in scp.splitlines():
         #pass
     return scp
