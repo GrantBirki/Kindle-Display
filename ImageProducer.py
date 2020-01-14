@@ -4,7 +4,7 @@ import optimage
 from PIL import Image, ImageFont, ImageDraw
 import subprocess
 from datetime import datetime
-from pstTime import get_pst_time
+from pstTime import get_pst_time, get_utc_time
 
 
 
@@ -17,14 +17,15 @@ def add_time(bus_dict_input):
 
         if timezone == 'pst':
             
-            current_time_pst = get_pst_time()
+            current_time_pst = get_pst_time('partial')
            
             print_time = "     Local Time: " + current_time_pst
             draw.text((50, 50), print_time, (0), font=fontsmall)
 
         else:
-            current_time = datetime.now()
-            draw.text((50, 50), current_time, (0), font=font)
+            current_time = get_utc_time()
+            print_time = "     UTC Time: " + current_time
+            draw.text((50, 50), print_time, (0), font=fontsmall)
 
 
         arrival_time = 'Next Bus: ' + str(bus_dict_input[0].arrival) + ' minutes'
@@ -61,11 +62,17 @@ def scp_send():
         #pass
     return scp
 
+def logging_data(bus_dict_log):
+    with open('logs.txt', 'a') as f:
+        log_time = get_pst_time('full')
+        log_line = str(bus_dict_log[0].predicted) + ', ' + str(bus_dict_log[0].arrival) + ', ' + log_time + '\n'
+        f.write(log_line)
+
 
 def main():
 
     #Environment Type
-    environment = 'dev'
+    environment = 'prod'
     global timezone
     timezone = 'pst'
 
@@ -74,6 +81,7 @@ def main():
             bh = BusHandler()
             bus_dict_out = bh.update_buses()
             add_time(bus_dict_out)
+            logging_data(bus_dict_out)
             scp_send()
             time.sleep(30)
 
