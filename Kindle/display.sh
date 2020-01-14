@@ -12,7 +12,6 @@ lasttime=$(head -n 1 $lasttimefile)
 if [ "$hash" == "$lasthash" ] && [ "$time" == "$lasttime" ]
 then
     exit 0
-    echo "Quitting"
 else
     if [ -f "$lasthashfile" ]
     then 
@@ -31,6 +30,5 @@ else
         touch $lasttimefile
         echo "$time" > "$lasttimefile"
     fi
-    echo "Displaying Image"
     eips -g /var/tmp/root/out.png
 fi
