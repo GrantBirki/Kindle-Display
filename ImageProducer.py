@@ -3,19 +3,50 @@ import time
 import optimage
 from PIL import Image, ImageFont, ImageDraw
 import subprocess
+from datetime import datetime
+from pstTime import get_pst_time
+
 
 
 def add_time(bus_dict_input):
         img = Image.open("blank.png")
         draw = ImageDraw.Draw(img)
         font = ImageFont.truetype("arial.ttf", 52)
+        fontsmall = ImageFont.truetype("arial.ttf", 40)
+        fontsmaller = ImageFont.truetype("arial.ttf", 36)
+
+        if timezone == 'pst':
+            
+            current_time_pst = get_pst_time()
+           
+            print_time = "     Local Time: " + current_time_pst
+            draw.text((50, 50), print_time, (0), font=fontsmall)
+
+        else:
+            current_time = datetime.now()
+            draw.text((50, 50), current_time, (0), font=font)
+
 
         arrival_time = 'Next Bus: ' + str(bus_dict_input[0].arrival) + ' minutes'
-        draw.text((50, 50), arrival_time, (0), font=font)
+        draw.text((50, 125), arrival_time, (0), font=font)
+
+        if bus_dict_input[0].predicted == True:
+            schedule = '                Real Time'
+            draw.text((50, 185), schedule, (0), font=fontsmaller)
+
+        else:
+            schedule = '                Scheduled'
+            draw.text((50, 185), schedule, (0), font=fontsmaller)
 
         if len(bus_dict_input) >= 2:
             arrival_time = 'Next Bus: ' + str(bus_dict_input[1].arrival) + ' minutes'
-            draw.text((50, 125), arrival_time, (0), font=font)
+            draw.text((50, 250), arrival_time, (0), font=font)
+            if bus_dict_input[1].predicted == True:
+                schedule2 = '                Real Time'
+                draw.text((50, 285), schedule2, (0), font=fontsmaller)
+            else:
+                schedule2 = '                Scheduled'
+                draw.text((50, 285), schedule2, (0), font=fontsmaller)
 
         else:
             pass
@@ -34,7 +65,9 @@ def scp_send():
 def main():
 
     #Environment Type
-    environment = 'prod'
+    environment = 'dev'
+    global timezone
+    timezone = 'pst'
 
     if environment == 'prod':
         while True:
