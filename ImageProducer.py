@@ -37,10 +37,12 @@ def main():
     environment = 'prod'
 
     if environment == 'prod':
-        bh = BusHandler()
-        bus_dict_out = bh.update_buses()
-        add_time(bus_dict_out)
-        scp_send()
+        while True:
+            bh = BusHandler()
+            bus_dict_out = bh.update_buses()
+            add_time(bus_dict_out)
+            scp_send()
+            time.sleep(30)
 
     
     elif environment == 'dev':
