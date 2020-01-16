@@ -115,9 +115,13 @@ def add_time(bus_list_input, bus_number):
 
 
 def scp_send():
-    scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
-    #for line in scp.splitlines():
-        #pass
+    try:
+        scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
+        #for line in scp.splitlines():
+            #pass
+    except:
+        time.sleep(30)
+        scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
     return scp
 
 def logging_data(bus_dict_log):
@@ -174,7 +178,7 @@ def main(environment, timezone, bus_numbers, bus_urls):
 
 if __name__ == "__main__":
     timezone = 'pst'
-    environment = 'dev'
+    environment = 'prod'
     bus_numbers = ['62', '31']
     bus_urls = ['http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_18270.json?key=', 'http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_18250.json?key=']
     main(environment, timezone, bus_numbers, bus_urls)
