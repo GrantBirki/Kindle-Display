@@ -1,6 +1,7 @@
 import requests
 import json
 import datetime
+import time
 
 class Bus:
   def __init__(self, bus_id, predicted, arrival):
@@ -13,13 +14,17 @@ class BusHandler:
     def __init__(self):
         self.bus_dict = {}
 
-    def http_call(self):
+    def http_call(self, url):
 
         with open('credentials.txt', 'r') as f:
             apikey = f.readline().strip()
 
-        url = 'http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_18270.json?key=' + apikey
-        response = requests.get(url)
+        url = url + apikey
+        try:
+            response = requests.get(url)
+        except:
+            time.sleep(20)
+            response = requests.get(url)
         data = response.json()
         num_of_buses = len(data['data']['entry']['arrivalsAndDepartures'])
         data = data['data']['entry']['arrivalsAndDepartures']
@@ -44,9 +49,9 @@ class BusHandler:
 
         return minutes_away
     
-    def update_buses(self):
+    def update_buses(self, url):
         current_time = datetime.datetime.now()
-        data, num_of_buses = self.http_call()
+        data, num_of_buses = self.http_call(url)
         
         for i in range(num_of_buses):
             time_type, arrival = self.parse_json(data, i)
@@ -59,9 +64,9 @@ class BusHandler:
 
             #print('OneBusAway - Predicted:', self.bus_dict[i].predicted, '| Arrival:', str(self.bus_dict[i].arrival) + ' minutes')
 
-            return self.bus_dict
+        return self.bus_dict
         
 if __name__ == "__main__":
+    url = 'http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_18270.json?key='
     bh = BusHandler()
-    bus_dict_out = bh.update_buses()
-
+    bus_dict_out = bh.update_buses(url)
