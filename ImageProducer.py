@@ -114,14 +114,25 @@ def add_time(bus_list_input, bus_number):
             img.save("out.png")
 
 
+def error_logging(input_error):
+    input_error = str(input_error) + '\n'
+    with open('errorlog.txt', 'a') as error_log:
+        error_log.write(input_error)
+
+
 def scp_send():
-    try:
-        scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
-        #for line in scp.splitlines():
-            #pass
-    except:
-        time.sleep(30)
-        scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
+    counter = 0
+    while counter <= 2:
+        try:
+            scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
+            break
+            #for line in scp.splitlines():
+                #pass
+        except Exception as e_scp_send:
+            error_logging(e_scp_send)
+            time.sleep(30)
+            counter += 1
+        
     return scp
 
 def logging_data(bus_dict_log):
@@ -140,20 +151,49 @@ def main(environment, timezone, bus_numbers, bus_urls):
             bus_master_list = []
             len_of_bus_numbers = len(bus_numbers)
             for i in range(len_of_bus_numbers):
-                if i == 0:
-                    bh = BusHandler()
-                    bus_dict_out0 = bh.update_buses(bus_urls[i])
-                    bus_master_list.append(bus_dict_out0)
+                try:
+                    if i == 0:
+                        bh = BusHandler()
+                        bus_dict_out0 = bh.update_buses(bus_urls[i])
+                        bus_master_list.append(bus_dict_out0)
 
-                elif i == 1:
-                    bh = BusHandler()
-                    bus_dict_out1 = bh.update_buses(bus_urls[i])
-                    bus_master_list.append(bus_dict_out1)
+                    elif i == 1:
+                        bh = BusHandler()
+                        bus_dict_out1 = bh.update_buses(bus_urls[i])
+                        bus_master_list.append(bus_dict_out1)
+                except Exception as e_get_bus_data:
+                    error_logging(e_get_bus_data)
+
+            try:
+                add_time(bus_master_list, bus_numbers)
+            except Exception as e_add_time:
+                error_logging(e_add_time)
+            scp_send()
+
+
+            partial_time = get_pst_time('partial')
+            hour = int(partial_time[:3])
+
+            if hour >= 0 and hour < 5:
+                time.sleep(120)
+
+            elif hour >= 5 and hour < 8:
+                time.sleep(60)
+
+            elif hour >= 8 and hour < 12:
+                time.sleep(30)
+
+            elif hour >= 12 and hour < 20:
+                time.sleep(60)
+
+            elif hour >= 20:
+                time.sleep(120)
+
+            else:
+                time.sleep(60)
+                error_logging('Else Statement for hour sleep check triggered')
 
             
-            add_time(bus_master_list, bus_numbers)
-            scp_send()
-            time.sleep(30)
 
     
     elif environment == 'dev':
