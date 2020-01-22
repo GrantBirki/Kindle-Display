@@ -120,11 +120,11 @@ def error_logging(input_error):
         error_log.write(input_error)
 
 
-def scp_send():
+def scp_send(kindle_path):
     counter = 0
     while counter <= 2:
         try:
-            scp = subprocess.check_output(["scp", "-i", "/home/pi/keys/KindPi_ssh_key.pem", "out.png", "root@192.168.1.14:/var/tmp/root"])
+            scp = subprocess.check_output(["scp", "-i", kindle_path])
             break
             #for line in scp.splitlines():
                 #pass
@@ -142,7 +142,7 @@ def logging_data(bus_dict_log):
         f.write(log_line)
 
 
-def main(environment, timezone, bus_numbers, bus_urls):
+def main(environment, timezone, bus_numbers, bus_urls, kindle_path):
     global globaltimezone
     globaltimezone = timezone
 
@@ -168,7 +168,7 @@ def main(environment, timezone, bus_numbers, bus_urls):
                 add_time(bus_master_list, bus_numbers)
             except Exception as e_add_time:
                 error_logging(e_add_time)
-            scp_send()
+            scp_send(kindle_path)
 
 
             partial_time = get_pst_time('partial')
@@ -219,6 +219,7 @@ def main(environment, timezone, bus_numbers, bus_urls):
 if __name__ == "__main__":
     timezone = 'pst'
     environment = 'prod'
+    kindle_path = 'root@192.168.1.14:/var/tmp/root'
     bus_numbers = ['62', '31']
     bus_urls = ['http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_18270.json?key=', 'http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_18250.json?key=']
-    main(environment, timezone, bus_numbers, bus_urls)
+    main(environment, timezone, bus_numbers, bus_urls, kindle_path)
